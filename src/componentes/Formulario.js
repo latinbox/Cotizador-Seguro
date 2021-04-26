@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import styled from '@emotion/styled';
+import { obtenerDiferenciaYear, calcularMarca } from '../helper';
 
 const Campo = styled.div`
  display: flex;
@@ -36,22 +37,69 @@ const Boton = styled.button`
         cursor: pointer;
     }
 `;
-
+const Error = styled.div`
+  background-color: red;
+  color: white;
+  padding: 1rem;
+  width: 100%100px;
+  text-align: center;
+  margin-bottom: 2rem;
+`;
 const Formulario = () => {
 const [datos, guardarDatos] = useState({
     marca: '',
     year: '',
     plan: ''
 });
+const [ error, guardarError] = useState(false);
 //extrar valores state
 const {marca,year,plan} = datos;
+//leer datos de formulario y colocarlos en el state
+const obtenerInformacion = e => {
+    guardarDatos({
+        ...datos,
+        [e.target.name] : e.target.value
+
+    })
+}
+// cuando el usuario presiona submit
+const cotizarSeguro = e => {
+    e.preventDefault();
+    if(marca.trim() === '' || year.trim() === '' || plan.trim() === ''){
+        guardarError(true);
+        return;
+    }
+    
+    guardarError(false);
+      // una base de 2000
+    let resultado = 2000;
+    //obtener la diferencia de años
+    const diferencia = obtenerDiferenciaYear(year);
+    console.log(diferencia);
+    // por cada hay restar el 3$
+    // eslint-disable-next-line no-unused-vars
+    resultado -= (( diferencia * 3 ) * resultado) / 100;
+    //Americano 15
+    //Asiatico 5%
+    // Eruropeo 30%
+    resultado = calcularMarca(marca) * resultado;
+    console.log(resultado);
+    //basico aumenta 20%
+    //Completo 50%
+    //Total
+}
+
 return (
-<form>
+<form
+  onSubmit={cotizarSeguro}
+>
+    {error ?<Error>Todos los campos son obligatorios</Error> :  null}
     <Campo>
         <Label>Marca</Label>
         <Select
          name="marca"
          value={marca}
+         onChange={obtenerInformacion}
         >
             <option value=""> ---Seleccione---</option>
             <option value="americano">Americano</option>
@@ -64,6 +112,7 @@ return (
         <Select
          name="year"
          value={year}
+         onChange={obtenerInformacion}
         >
         <option value="">-- Seleccione --</option>
         <option value="2021">2021</option>
@@ -85,16 +134,18 @@ return (
           name="plan"
           value="basico"
           checked={plan === "basico"}
+          onChange={obtenerInformacion}
          /> Básico
          <InputRadio 
           type="radio"
           name="plan"
           value="completo"
           checked={plan === "completo"}
+          onChange={obtenerInformacion}
          /> Completo
     </Campo>
 
-    <Boton type="button">Cotizar</Boton>
+    <Boton type="submit">Cotizar</Boton>
 </form>
 );
 }
