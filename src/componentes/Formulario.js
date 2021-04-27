@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import styled from '@emotion/styled';
-import { obtenerDiferenciaYear, calcularMarca } from '../helper';
+import PropTypes from 'prop-types';
+import { obtenerDiferenciaYear, calcularMarca, obtenerPlan } from '../helper';
 
 const Campo = styled.div`
  display: flex;
@@ -45,7 +46,7 @@ const Error = styled.div`
   text-align: center;
   margin-bottom: 2rem;
 `;
-const Formulario = () => {
+const Formulario = ({guardarResumen, guardarCargando}) => {
 const [datos, guardarDatos] = useState({
     marca: '',
     year: '',
@@ -86,6 +87,22 @@ const cotizarSeguro = e => {
     console.log(resultado);
     //basico aumenta 20%
     //Completo 50%
+    const incrementoPlan = obtenerPlan(plan);
+        resultado = parseFloat( incrementoPlan * resultado ).toFixed(2);
+
+        guardarCargando(true);
+
+        setTimeout(() => {
+
+            // Elimina el spinner
+            guardarCargando(false);
+
+            // pasa la información al componente principal
+            guardarResumen({
+                cotizacion: Number(resultado),
+                datos
+            });
+        }, 3000);
     //Total
 }
 
@@ -150,5 +167,10 @@ return (
 );
 }
 
+Formulario.propTypes = {
+    guardarResumen: PropTypes.func.isRequired,
+    guardarCargando: PropTypes.func.isRequired
+}
+ 
  
 export default Formulario;
